@@ -24,6 +24,7 @@ pub fn quote(data: &Data, type_name: &Ident, input: &TokenStream) -> TokenStream
 	match *data {
 		Data::Struct(ref data) => match data.fields {
 			Fields::Named(_) | Fields::Unnamed(_) => create_instance(
+
 				quote! { #type_name },
 				input,
 				&data.fields,
@@ -97,6 +98,7 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
 				let #res = <
 					<#field_type as _parity_scale_codec::HasCompact>::Type as _parity_scale_codec::Decode
 				>::decode(#input);
+                println!("Decoding {:?}", #res):
 				match #res {
 					Err(_) => return Err(#err_msg.into()),
 					Ok(#res) => #res.into(),
@@ -104,9 +106,10 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
 			}
 		}
 	} else if let Some(encoded_as) = encoded_as {
-		quote_spanned! { field.span() =>
+        quote_spanned! { field.span() =>
 			{
-				let #res = <#encoded_as as _parity_scale_codec::Decode>::decode(#input);
+                let #res = <#encoded_as as _parity_scale_codec::Decode>::decode(#input);
+                println!("Decoding {:?}", #res);
 				match #res {
 					Err(_) => return Err(#err_msg.into()),
 					Ok(#res) => #res.into(),
@@ -118,7 +121,8 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
 	} else {
 		quote_spanned! { field.span() =>
 			{
-				let #res = _parity_scale_codec::Decode::decode(#input);
+                let #res = _parity_scale_codec::Decode::decode(#input);
+                println!("Decoding {:?}", #res);
 				match #res {
 					Err(_) => return Err(#err_msg.into()),
 					Ok(#res) => #res,
