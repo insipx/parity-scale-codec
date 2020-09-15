@@ -98,9 +98,11 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
 				let #res = <
 					<#field_type as _parity_scale_codec::HasCompact>::Type as _parity_scale_codec::Decode
 				>::decode(#input);
-                println!("Decoding {:?}", #res):
-				match #res {
-					Err(_) => return Err(#err_msg.into()),
+                match #res {
+					Err(e) => {
+                        println!("err: {:?}", e);
+                        return Err(#err_msg.into());
+                    },
 					Ok(#res) => #res.into(),
 				}
 			}
@@ -109,9 +111,11 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
         quote_spanned! { field.span() =>
 			{
                 let #res = <#encoded_as as _parity_scale_codec::Decode>::decode(#input);
-                println!("Decoding {:?}", #res);
 				match #res {
-					Err(_) => return Err(#err_msg.into()),
+					Err(e) => { 
+                        println!("err: {:?}", e);
+                        return Err(#err_msg.into());
+                    }
 					Ok(#res) => #res.into(),
 				}
 			}
@@ -122,9 +126,11 @@ fn create_decode_expr(field: &Field, name: &str, input: &TokenStream) -> TokenSt
 		quote_spanned! { field.span() =>
 			{
                 let #res = _parity_scale_codec::Decode::decode(#input);
-                println!("Decoding {:?}", #res);
 				match #res {
-					Err(_) => return Err(#err_msg.into()),
+					Err(e) => {
+                        println!("err: {:?}", e);
+                        return Err(#err_msg.into());
+                    }
 					Ok(#res) => #res,
 				}
 			}
